@@ -8,6 +8,7 @@ var express = require('express')
   , user = require('./user')
   , client = require('./client')
   , util = require('util')
+, login = require('./login');
   
   
 // Express configuration
@@ -47,7 +48,16 @@ app.get('/dialog/authorize', oauth2.authorization);
 app.post('/dialog/authorize/decision', oauth2.decision);
 app.post('/oauth/token', oauth2.token);
 
+
+app.post('/authorize', oauth2.decision);
+
 app.get('/api/userinfo', user.info);
 app.get('/api/clientinfo', client.info);
+
+app.post('/iam/json/customers/authenticate', login.authenticate);
+
+app.get('*', function(req, res) {
+    console.log('req', req, res);
+});
 
 app.listen(3000);
