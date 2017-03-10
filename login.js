@@ -1,4 +1,5 @@
 var passport = require('passport');
+var oauth2 = require('./oauth2');
 
 function getAuthId() {
     return {
@@ -61,12 +62,8 @@ function getAuthId() {
              // EXtract username and password from callbacks so we can log in against the oAuth server.
              req.body.username = req.body.callbacks[0].input[0].value;
              req.body.password = req.body.callbacks[1].input[0].value;
-         }
-         next();
-     },
-     function(req, res, next) {
-         if(req.body.authId) {
-             return passport.authenticate('local', {}, function (err, user, info) {
+
+             return passport.authenticate('local', { session: false, noredirect: true }, function (err, user, info) {
                  if (!user) {
                      res.status(401);
                      res.json({
