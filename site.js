@@ -13,7 +13,9 @@ exports.loginForm = function(req, res) {
   res.render('login');
 };
 
-exports.login = passport.authenticate('local', { successReturnToOrRedirect: '/', failureRedirect: '/login' });
+exports.login = function(req, res, done) {
+  return passport.authenticate('local', { successReturnToOrRedirect: '/', failureRedirect: '/login' })(req, res, done);
+}
 
 exports.logout = function(req, res) {
   req.logout();

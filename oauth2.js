@@ -48,6 +48,9 @@ server.deserializeClient(function(id, done) {
 // the application.  The application issues a code, which is bound to these
 // values, and will be exchanged for an access token.
 
+
+
+
 server.grant(oauth2orize.grant.code(function(client, redirectURI, user, ares, done) {
   var code = utils.uid(16)
   
@@ -151,6 +154,45 @@ server.exchange(oauth2orize.exchange.clientCredentials(function(client, scope, d
         });
     });
 }));
+
+
+exports.authorize = [
+    function hackSessionToken(req, res, next) {
+
+        // HAck in the iPLanetDirPro cookie to set the user and trick oauth2orise into thinking it has a session.
+        var iPlanetDirectoryProValue = req.headers.iplanetdirectorypro || req.cookies.iplanetdirectorypro;
+        if (iPlanetDirectoryProValue) {
+            var parts = iPlanetDirectoryProValue.split(':');
+            req.user = req.user || {};
+            req.user.name = parts[0];
+            req.user.password = parts[1];
+        }
+
+        // The user would normally load a screen with an accept dialog and a transaction_id in the form.
+        // We are'nt doing this so need to hack it into one request.
+        // Need to check whether openAM needs this as 2 requests or one.
+        // Below we hack the internals of oauth2orize so that it thinks we are coming from a dialog screen.
+        var transactionId = 123456;
+        req.body.transaction_id = transactionId;
+        req.session.authorize = req.session.authorize || {};
+        // Add a dummmy transaction
+        req.session.authorize[transactionId] = {
+            client: "2", // This means we can only use client xyz123
+            protocol: "oauth2",
+            redirectURI: req.query.redirect_uri,
+            req: {
+                type: "code"
+            }
+        };
+        next();
+    },
+    login.ensureLoggedIn(),
+    server.decision(function parse(req, done) {
+        return done(null, {
+            // Hack internals of oauth2orize; means we can only use code grant in the endpoint.
+            type: "code", done
+        });
+    })];
 
 // user authorization endpoint
 //

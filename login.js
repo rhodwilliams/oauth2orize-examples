@@ -63,7 +63,7 @@ function getAuthId() {
              req.body.username = req.body.callbacks[0].input[0].value;
              req.body.password = req.body.callbacks[1].input[0].value;
 
-             return passport.authenticate('local', { session: false, noredirect: true }, function (err, user, info) {
+             return passport.authenticate('local', { }, function (err, user, info) {
                  if (!user) {
                      res.status(401);
                      res.json({
@@ -74,8 +74,9 @@ function getAuthId() {
                      });
                  }
                  else {
+                     var iPlanetDirectoryProValue = `${user.username}:${user.password}`;
                      res.json({
-                         "tokenId": "123456789",
+                         "tokenId": iPlanetDirectoryProValue,
                          "successUrl": "/iam/profile"
                      });
                  }

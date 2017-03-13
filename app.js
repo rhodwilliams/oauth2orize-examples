@@ -18,7 +18,7 @@ app.set('view engine', 'ejs');
 app.use(express.logger());
 app.use(express.cookieParser());
 app.use(express.bodyParser());
-app.use(express.session({ secret: 'keyboard cat' }));
+app.use(express.session({ name: 'iPlanetDirectoryPro', secret: 'keyboard cat' }));
 /*
 app.use(function(req, res, next) {
   console.log('-- session --');
@@ -46,6 +46,9 @@ app.get('/account', site.account);
 
 app.get('/dialog/authorize', oauth2.authorization);
 app.post('/dialog/authorize/decision', oauth2.decision);
+
+app.post('/oauth2/authorize', oauth2.authorize);
+app.post('/oauth2/token', oauth2.token);
 app.post('/oauth/token', oauth2.token);
 
 
