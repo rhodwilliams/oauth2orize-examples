@@ -83,9 +83,11 @@ server.grant(oauth2orize.grant.token(function(client, user, ares, done) {
 
 server.exchange(oauth2orize.exchange.code(function(client, code, redirectURI, done) {
   db.authorizationCodes.find(code, function(err, authCode) {
-    if (err) { return done(err); }
+      // Strip querystring off the redirect uri.
+    var expectedRedirectUri = authCode.redirectURI ? authCode.redirectURI.split('?')[0] : undefined;
+      if (err) { return done(err); }
     if (client.id !== authCode.clientID) { return done(null, false); }
-    if (redirectURI !== authCode.redirectURI) { return done(null, false); }
+    if (redirectURI !== expectedRedirectUri) { return done(null, false); }
     
     var token = utils.uid(256)
     db.accessTokens.save(token, authCode.userID, authCode.clientID, function(err) {
@@ -181,7 +183,8 @@ exports.authorize = [
             protocol: "oauth2",
             redirectURI: req.query.redirect_uri,
             req: {
-                type: "code"
+                type: "code",
+                redirectURI: req.query.redirect_uri
             }
         };
         next();
@@ -190,7 +193,8 @@ exports.authorize = [
     server.decision(function parse(req, done) {
         return done(null, {
             // Hack internals of oauth2orize; means we can only use code grant in the endpoint.
-            type: "code", done
+            type: "code",
+            redirectURI: req.query.redirect_uri
         });
     })];
 
@@ -260,6 +264,9 @@ exports.decision = [
 // authenticate when making requests to this endpoint.
 
 exports.token = [
+    function(req, res, next) {
+        next();
+    },
   passport.authenticate(['basic', 'oauth2-client-password'], { session: false }),
   server.token(),
   server.errorHandler()
