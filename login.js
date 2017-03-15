@@ -80,7 +80,6 @@ function getAuthId() {
                          "successUrl": "/iam/profile"
                      });
                  }
-                 next();
              })(req, res, next);
          }
      }
