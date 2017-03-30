@@ -47,9 +47,10 @@ app.get('/account', site.account);
 app.get('/dialog/authorize', oauth2.authorization);
 app.post('/dialog/authorize/decision', oauth2.decision);
 
-app.post('/oauth2/authorize', oauth2.authorize);
+app.get('/iam/oauth2/customer/authorize', oauth2.authorize);
+app.post('/iam/oauth2/customer/authorize', oauth2.authorize);
+app.post('/iam/oauth2/customer/access_token', oauth2.token);
 app.post('/oauth2/token', oauth2.token);
-app.post('/oauth/token', oauth2.token);
 
 
 app.post('/authorize', oauth2.decision);
@@ -57,7 +58,7 @@ app.post('/authorize', oauth2.decision);
 app.get('/api/userinfo', user.info);
 app.get('/api/clientinfo', client.info);
 
-app.post('/iam/json/customers/authenticate', login.authenticate);
+app.post('/iam/json/customer/authenticate', login.authenticate);
 
 app.get('*', function(req, res) {
     console.log('req', req, res);
